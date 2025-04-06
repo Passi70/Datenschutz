@@ -8,26 +8,29 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
     <style>
-        html, body {
-            margin: 0;
-            padding: 0;
+        body {
             font-family: Arial, sans-serif;
             background-color: #f0f2f5;
-            height: 100%;
-            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
         }
         .container {
             background: white;
             padding: 15px;
             border-radius: 12px;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            width: 100vw;
-            height: 100vh;
+            width: 90%;
+            max-width: 600px;
+            text-align: left;
             box-sizing: border-box;
-            overflow-y: auto;
+            position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
+            justify-content: center;
         }
         h2 {
             color: #333;
@@ -74,6 +77,12 @@
             background-color: #28a745;
             cursor: pointer;
         }
+        #clearButton {
+            background-color: #dc3545;
+        }
+        #clearButton.active {
+            background-color: #28a745;
+        }
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -81,7 +90,7 @@
             font-size: 0.9rem;
             flex-wrap: wrap;
         }
-        .checkbox-container input {
+        .checkbox-container input[type="checkbox"] {
             width: 20px;
             height: 20px;
         }
@@ -94,12 +103,15 @@
             margin: 10px 0;
             touch-action: none;
         }
-        @media (max-width: 500px), (orientation: landscape) {
+        @media (max-width: 500px) {
+            body {
+                padding: 20px 0;
+            }
             .container {
-                border-radius: 0;
-                padding: 10px;
-                height: 100vh;
-                max-height: 100vh;
+                width: 95%;
+            }
+            .header-info {
+                text-align: left;
             }
             .checkbox-container {
                 flex-direction: column;
@@ -130,11 +142,11 @@
 
     <h3>Unterschrift:</h3>
     <canvas id="signature-pad"></canvas>
-    <button type="button" onclick="clearSignature()" id="clearButton">Unterschrift löschen</button>
+    <button type="button" id="clearButton" onclick="clearSignature()">Unterschrift löschen</button>
 
     <h3>Bestätigung:</h3>
     <div class="checkbox-container">
-        <input type="checkbox" id="confirmCheckbox" onchange="toggleButton()">
+        <input type="checkbox" id="confirmCheckbox" onchange="toggleSaveButton()">
         <label for="confirmCheckbox">Hiermit bestätige ich, dass ich die mir in der Praxis vorgelegte Datenschutzerklärung gelesen habe.</label>
     </div>
 
@@ -146,35 +158,31 @@
     const signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
 
     function resizeCanvas() {
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = 100 * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-        signaturePad.clear();
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 100;
     }
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
     function clearSignature() {
         signaturePad.clear();
-        document.getElementById("confirmCheckbox").checked = false;
-        toggleButton();
-        document.getElementById("clearButton").style.backgroundColor = "#dc3545";
+        document.getElementById("clearButton").classList.add("active");
         setTimeout(() => {
-            document.getElementById("clearButton").style.backgroundColor = "#dc3545";
-        }, 300);
+            document.getElementById("clearButton").classList.remove("active");
+        }, 1000);
+        document.getElementById("confirmCheckbox").checked = false;
+        toggleSaveButton();
     }
 
-    function toggleButton() {
+    function toggleSaveButton() {
+        const button = document.getElementById("saveButton");
         const name = document.getElementById("name").value.trim();
         const address = document.getElementById("address").value.trim();
         const plz = document.getElementById("plz").value.trim();
         const ort = document.getElementById("ort").value.trim();
         const checkbox = document.getElementById("confirmCheckbox").checked;
-        const hasSignature = !signaturePad.isEmpty();
-        const button = document.getElementById("saveButton");
 
-        if (name && address && plz && ort && checkbox && hasSignature) {
+        if (name && address && plz && ort && checkbox && !signaturePad.isEmpty()) {
             button.disabled = false;
             button.classList.add("active");
         } else {
@@ -183,12 +191,12 @@
         }
     }
 
-    document.querySelectorAll("input, #confirmCheckbox").forEach(el => {
-        el.addEventListener("input", toggleButton);
-        el.addEventListener("change", toggleButton);
+    ["name", "address", "plz", "ort"].forEach(id => {
+        document.getElementById(id).addEventListener("input", toggleSaveButton);
     });
-    canvas.addEventListener("mouseup", toggleButton);
-    canvas.addEventListener("touchend", toggleButton);
+    document.getElementById("confirmCheckbox").addEventListener("change", toggleSaveButton);
+    canvas.addEventListener("mouseup", toggleSaveButton);
+    canvas.addEventListener("touchend", toggleSaveButton);
 
     function generatePDF() {
         const name = document.getElementById("name").value;
@@ -196,7 +204,12 @@
         const plz = document.getElementById("plz").value;
         const ort = document.getElementById("ort").value;
         const signatureDataUrl = signaturePad.toDataURL();
-        const formattedDate = new Date().toLocaleDateString("de-DE");
+
+        const today = new Date();
+        const day = String(today.getDate()).padStart(2, '0');
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const year = today.getFullYear();
+        const formattedDate = `${day}.${month}.${year}`;
 
         const docDefinition = {
             content: [
@@ -227,7 +240,7 @@
             }
         };
 
-        pdfMake.createPdf(docDefinition).download(`Datenschutzerklaerung_${name}.pdf`);
+        pdfMake.createPdf(docDefinition).download(`Datenschutzerklärung_${name}.pdf`);
     }
 </script>
 </body>
