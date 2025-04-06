@@ -2,39 +2,43 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Datenschutzerklärung</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
     <style>
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    overflow: hidden;
-}
+        :root {
+            --vh: 1vh;
+        }
 
-.container {
-    background: white;
-    padding: 15px;
-    border-radius: 12px;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-    width: 95vw;
-    max-width: 600px;
-    max-height: 95vh;
-    overflow-y: auto;
-    text-align: left;
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-}
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: calc(var(--vh, 1vh) * 100);
+            overflow: hidden;
+        }
+
+        .container {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+            width: 95vw;
+            max-width: 600px;
+            height: calc(var(--vh, 1vh) * 92);
+            overflow-y: auto;
+            text-align: left;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
 
         h2 {
             color: #333;
@@ -42,21 +46,25 @@ body {
             margin-bottom: 10px;
             font-weight: bold;
         }
+
         .header-info {
             font-size: 0.9rem;
             color: #333;
             text-align: right;
             margin-bottom: 10px;
         }
+
         .header-info p {
             margin: 0;
         }
+
         label {
             font-size: 0.9rem;
             font-weight: bold;
             margin-bottom: 5px;
             display: block;
         }
+
         input {
             display: block;
             width: 100%;
@@ -65,28 +73,37 @@ body {
             border-radius: 5px;
             font-size: 0.9rem;
         }
+
         button {
-            background-color: #ccc;
-            color: white;
             padding: 10px;
             border: none;
             border-radius: 5px;
-            cursor: not-allowed;
             font-size: 1rem;
             transition: background 0.3s;
             width: 100%;
             margin-top: 8px;
         }
-        button.active {
+
+        #clearButton {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        #clearButton.clicked {
+            background-color: #28a745;
+        }
+
+        #saveButton {
+            background-color: #ccc;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        #saveButton.active {
             background-color: #28a745;
             cursor: pointer;
         }
-        #clearButton {
-            background-color: #dc3545;
-        }
-        #clearButton.active {
-            background-color: #28a745;
-        }
+
         .checkbox-container {
             display: flex;
             align-items: center;
@@ -94,10 +111,12 @@ body {
             font-size: 0.9rem;
             flex-wrap: wrap;
         }
-        .checkbox-container input[type="checkbox"] {
+
+        .checkbox-container input {
             width: 20px;
             height: 20px;
         }
+
         #signature-pad {
             border: 2px solid black;
             width: 100%;
@@ -106,21 +125,6 @@ body {
             background-color: white;
             margin: 10px 0;
             touch-action: none;
-        }
-        @media (max-width: 500px) {
-            body {
-                padding: 20px 0;
-            }
-            .container {
-                width: 95%;
-            }
-            .header-info {
-                text-align: left;
-            }
-            .checkbox-container {
-                flex-direction: column;
-                align-items: flex-start;
-            }
         }
     </style>
 </head>
@@ -160,6 +164,16 @@ body {
 <script>
     const canvas = document.getElementById("signature-pad");
     const signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+    const saveButton = document.getElementById("saveButton");
+    const clearButton = document.getElementById("clearButton");
+    const confirmCheckbox = document.getElementById("confirmCheckbox");
+
+    function fixIOSHeight() {
+        const vh = window.innerHeight * 0.01;
+        document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    window.addEventListener('resize', fixIOSHeight);
+    fixIOSHeight();
 
     function resizeCanvas() {
         canvas.width = canvas.offsetWidth;
@@ -170,35 +184,35 @@ body {
 
     function clearSignature() {
         signaturePad.clear();
-        document.getElementById("clearButton").classList.add("active");
-        setTimeout(() => {
-            document.getElementById("clearButton").classList.remove("active");
-        }, 1000);
-        document.getElementById("confirmCheckbox").checked = false;
+        clearButton.classList.add("clicked");
+        setTimeout(() => clearButton.classList.remove("clicked"), 500);
+        confirmCheckbox.checked = false;
         toggleSaveButton();
     }
 
     function toggleSaveButton() {
-        const button = document.getElementById("saveButton");
         const name = document.getElementById("name").value.trim();
         const address = document.getElementById("address").value.trim();
         const plz = document.getElementById("plz").value.trim();
         const ort = document.getElementById("ort").value.trim();
-        const checkbox = document.getElementById("confirmCheckbox").checked;
 
-        if (name && address && plz && ort && checkbox && !signaturePad.isEmpty()) {
-            button.disabled = false;
-            button.classList.add("active");
+        const isFormComplete = name && address && plz && ort && !signaturePad.isEmpty() && confirmCheckbox.checked;
+
+        if (isFormComplete) {
+            saveButton.disabled = false;
+            saveButton.classList.add("active");
         } else {
-            button.disabled = true;
-            button.classList.remove("active");
+            saveButton.disabled = true;
+            saveButton.classList.remove("active");
         }
     }
 
-    ["name", "address", "plz", "ort"].forEach(id => {
-        document.getElementById(id).addEventListener("input", toggleSaveButton);
+    document.querySelectorAll("input, canvas").forEach(el => {
+        el.addEventListener("input", toggleSaveButton);
+        el.addEventListener("mouseup", toggleSaveButton);
+        el.addEventListener("touchend", toggleSaveButton);
     });
-    document.getElementById("confirmCheckbox").addEventListener("change", toggleSaveButton);
+
     canvas.addEventListener("mouseup", toggleSaveButton);
     canvas.addEventListener("touchend", toggleSaveButton);
 
@@ -208,12 +222,8 @@ body {
         const plz = document.getElementById("plz").value;
         const ort = document.getElementById("ort").value;
         const signatureDataUrl = signaturePad.toDataURL();
-
         const today = new Date();
-        const day = String(today.getDate()).padStart(2, '0');
-        const month = String(today.getMonth() + 1).padStart(2, '0');
-        const year = today.getFullYear();
-        const formattedDate = `${day}.${month}.${year}`;
+        const formattedDate = today.toLocaleDateString('de-DE');
 
         const docDefinition = {
             content: [
@@ -244,7 +254,7 @@ body {
             }
         };
 
-        pdfMake.createPdf(docDefinition).download(`Datenschutzerklärung_${name}.pdf`);
+        pdfMake.createPdf(docDefinition).download(`Datenschutzerklaerung_${name}.pdf`);
     }
 </script>
 </body>
