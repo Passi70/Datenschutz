@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Datenschutzerklärung</title>
+  <link rel="manifest" href="manifest.json">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      background-color: #f0f2f5;
+      height: 100%;
+      overflow: hidden;
+    }
+    .container {
+      background: white;
+      padding: 15px;
+      border-radius: 12px;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+      width: 90%;
+      max-width: 600px;
+      margin: auto;
+      margin-top: 20px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+    }
+    h2 {
+      color: #333;
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+      font-weight: bold;
+    }
+    .header-info {
+      font-size: 0.9rem;
+      color: #333;
+      text-align: right;
+      margin-bottom: 10px;
+    }
+    label {
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-top: 10px;
+      display: block;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 0.9rem;
+    }
+    canvas {
+      border: 2px solid black;
+      border-radius: 5px;
+      background-color: white;
+      margin: 10px 0;
+      width: 100%;
+      height: 100px;
+      touch-action: none;
+    }
+    button {
+      background-color: #ccc;
+      color: white;
+      padding: 10px;
+      border: none;
+      border-radius: 5px;
+      cursor: not-allowed;
+      font-size: 1rem;
+      margin-top: 10px;
+    }
+    button.active {
+      background-color: #28a745;
+      cursor: pointer;
+    }
+    #clearButton {
+      background-color: #dc3545;
+      cursor: pointer;
+    }
+    #clearButton.clicked {
+      background-color: #28a745;
+    }
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    @media (max-width: 500px) {
+      html, body {
+        overflow-y: auto;
+        height: auto;
+      }
+      .container {
+        width: 95%;
+        margin: 20px auto;
+      }
+      .checkbox-container {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Datenschutzerklärung</h2>
+    <div class="header-info">
+      <p>Physiotherapie Ute Fortan</p>
+      <p>Marktplatz 5, 19294 Eldena</p>
+    </div>
+
+    <label for="name">Name:</label>
+    <input type="text" id="name">
+    <label for="address">Adresse:</label>
+    <input type="text" id="address">
+    <label for="plz">PLZ:</label>
+    <input type="text" id="plz">
+    <label for="ort">Ort:</label>
+    <input type="text" id="ort">
+
+    <h3>Unterschrift:</h3>
+    <canvas id="signature-pad"></canvas>
+    <button id="clearButton" onclick="clearSignature()">Unterschrift löschen</button>
+
+    <h3>Bestätigung:</h3>
+    <div class="checkbox-container">
+      <input type="checkbox" id="confirmCheckbox" onchange="updateSaveButtonState()">
+      <label for="confirmCheckbox">Hiermit bestätige ich, dass ich die mir in der Praxis vorgelegte Datenschutzerklärung gelesen habe.</label>
+    </div>
+
+    <button id="saveButton" onclick="generatePDF()" disabled>Speichern als PDF</button>
+  </div>
+
+  <script>
+    const canvas = document.getElementById("signature-pad");
+    const signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = 100;
+      signaturePad.clear();
+    }
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const clearButton = document.getElementById("clearButton");
+    const saveButton = document.getElementById("saveButton");
+
+    function clearSignature() {
+      signaturePad.clear();
+      clearButton.classList.add("clicked");
+      document.getElementById("confirmCheckbox").checked = false;
+      updateSaveButtonState();
+      setTimeout(() => clearButton.classList.remove("clicked"), 500);
+    }
+
+    function isFormValid() {
+      const name = document.getElementById("name").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const plz = document.getElementById("plz").value.trim();
+      const ort = document.getElementById("ort").value.trim();
+      const checkboxChecked = document.getElementById("confirmCheckbox").checked;
+      return name && address && plz && ort && checkboxChecked && !signaturePad.isEmpty();
+    }
+
+    function updateSaveButtonState() {
+      if (isFormValid()) {
+        saveButton.disabled = false;
+        saveButton.classList.add("active");
+      } else {
+        saveButton.disabled = true;
+        saveButton.classList.remove("active");
+      }
+    }
+
+    document.querySelectorAll("input, #confirmCheckbox").forEach(el => {
+      el.addEventListener("input", updateSaveButtonState);
+      el.addEventListener("change", updateSaveButtonState);
+    });
+
+    canvas.addEventListener("mouseup", updateSaveButtonState);
+    canvas.addEventListener("touchend", updateSaveButtonState);
+
+    function generatePDF() {
+      const name = document.getElementById("name").value;
+      const address = document.getElementById("address").value;
+      const plz = document.getElementById("plz").value;
+      const ort = document.getElementById("ort").value;
+      const signatureDataUrl = signaturePad.toDataURL();
+      const formattedDate = new Date().toLocaleDateString("de-DE");
+
+      const docDefinition = {
+        content: [
+          { text: "Datenschutzerklärung", style: "header" },
+          { text: "1. Verantwortliche Stelle", style: "subheader" },
+          { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
+          { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
+          { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet..." },
+          { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
+          { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung..." },
+          { text: "4. Weitergabe an Dritte", style: "subheader" },
+          { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist..." },
+          { text: "5. Speicherdauer", style: "subheader" },
+          { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist..." },
+          { text: "6. Ihre Rechte", style: "subheader" },
+          { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung..." },
+          { text: "7. Kontakt und Beschwerden", style: "subheader" },
+          { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse." },
+          { text: "\n________________________________________", margin: [0, 10, 0, 0] },
+          { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
+          { text: "________________________________________", margin: [0, 10, 0, 0] },
+          { text: "Unterschrift", italics: true },
+          { image: signatureDataUrl, width: 200, height: 100, margin: [0, 10, 0, 0] }
+        ],
+        styles: {
+          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+          subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] }
+        }
+      };
+
+      pdfMake.createPdf(docDefinition).download(`Datenschutzerklärung_${name}.pdf`);
+    }
+  </script>
+</body>
+</html>
