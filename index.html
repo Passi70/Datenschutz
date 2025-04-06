@@ -1,54 +1,59 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="apple-mobile-web-app-capable" content="yes">
   <title>Datenschutzerklärung</title>
-  <link rel="manifest" href="manifest.json">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
   <style>
-    html, body {
-      margin: 0;
-      padding: 0;
+    body {
       font-family: Arial, sans-serif;
       background-color: #f0f2f5;
-      height: 100%;
-      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
     }
+
     .container {
       background: white;
-      padding: 15px;
+      padding: 20px;
       border-radius: 12px;
-      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
       width: 90%;
       max-width: 600px;
-      margin: auto;
-      margin-top: 20px;
       box-sizing: border-box;
       display: flex;
       flex-direction: column;
     }
+
     h2 {
-      color: #333;
-      font-size: 1.4rem;
+      font-size: 1.6rem;
       margin-bottom: 10px;
-      font-weight: bold;
     }
+
     .header-info {
       font-size: 0.9rem;
       color: #333;
       text-align: right;
       margin-bottom: 10px;
     }
+
+    .header-info p {
+      margin: 0;
+    }
+
     label {
       font-size: 0.9rem;
       font-weight: bold;
-      margin-top: 10px;
-      display: block;
+      margin: 10px 0 5px;
     }
+
     input {
       width: 100%;
       padding: 8px;
@@ -56,54 +61,80 @@
       border-radius: 5px;
       font-size: 0.9rem;
     }
-    canvas {
-      border: 2px solid black;
-      border-radius: 5px;
-      background-color: white;
-      margin: 10px 0;
-      width: 100%;
-      height: 100px;
-      touch-action: none;
-    }
+
     button {
-      background-color: #ccc;
-      color: white;
       padding: 10px;
       border: none;
       border-radius: 5px;
-      cursor: not-allowed;
       font-size: 1rem;
+      width: 100%;
       margin-top: 10px;
+      transition: background 0.3s;
     }
-    button.active {
+
+    #saveButton {
+      background-color: #ccc;
+      color: white;
+      cursor: not-allowed;
+    }
+
+    #saveButton.active {
       background-color: #28a745;
       cursor: pointer;
     }
+
     #clearButton {
       background-color: #dc3545;
-      cursor: pointer;
+      color: white;
     }
-    #clearButton.clicked {
+
+    #clearButton.cleared {
       background-color: #28a745;
     }
+
     .checkbox-container {
       display: flex;
       align-items: flex-start;
       gap: 10px;
+      font-size: 0.9rem;
       margin-top: 10px;
     }
-    @media (max-width: 500px) {
-      html, body {
-        overflow-y: auto;
-        height: auto;
+
+    .checkbox-container input {
+      margin-top: 5px;
+    }
+
+    #signature-pad {
+      border: 2px solid black;
+      border-radius: 5px;
+      background-color: white;
+      margin-top: 10px;
+      touch-action: none;
+    }
+
+    @media (max-width: 768px) {
+      body {
+        padding: 20px 0;
+        align-items: flex-start;
       }
+
       .container {
         width: 95%;
-        margin: 20px auto;
       }
+
+      .header-info {
+        text-align: left;
+      }
+
       .checkbox-container {
         flex-direction: column;
         align-items: flex-start;
+      }
+    }
+
+    @media (orientation: landscape) and (max-width: 1024px) {
+      #signature-pad {
+        height: 120px;
       }
     }
   </style>
@@ -117,21 +148,24 @@
     </div>
 
     <label for="name">Name:</label>
-    <input type="text" id="name">
+    <input type="text" id="name" />
+
     <label for="address">Adresse:</label>
-    <input type="text" id="address">
+    <input type="text" id="address" />
+
     <label for="plz">PLZ:</label>
-    <input type="text" id="plz">
+    <input type="text" id="plz" />
+
     <label for="ort">Ort:</label>
-    <input type="text" id="ort">
+    <input type="text" id="ort" />
 
     <h3>Unterschrift:</h3>
-    <canvas id="signature-pad"></canvas>
-    <button id="clearButton" onclick="clearSignature()">Unterschrift löschen</button>
+    <canvas id="signature-pad" height="150"></canvas>
+    <button id="clearButton" type="button" onclick="clearSignature()">Unterschrift löschen</button>
 
     <h3>Bestätigung:</h3>
     <div class="checkbox-container">
-      <input type="checkbox" id="confirmCheckbox" onchange="updateSaveButtonState()">
+      <input type="checkbox" id="confirmCheckbox" onchange="updateButtonState()" />
       <label for="confirmCheckbox">Hiermit bestätige ich, dass ich die mir in der Praxis vorgelegte Datenschutzerklärung gelesen habe.</label>
     </div>
 
@@ -141,36 +175,33 @@
   <script>
     const canvas = document.getElementById("signature-pad");
     const signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+    const saveButton = document.getElementById("saveButton");
+    const clearButton = document.getElementById("clearButton");
+    const confirmCheckbox = document.getElementById("confirmCheckbox");
 
     function resizeCanvas() {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = 100;
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = 150 * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
       signaturePad.clear();
     }
-    resizeCanvas();
+
     window.addEventListener("resize", resizeCanvas);
-
-    const clearButton = document.getElementById("clearButton");
-    const saveButton = document.getElementById("saveButton");
-
-    function clearSignature() {
-      signaturePad.clear();
-      clearButton.classList.add("clicked");
-      document.getElementById("confirmCheckbox").checked = false;
-      updateSaveButtonState();
-      setTimeout(() => clearButton.classList.remove("clicked"), 500);
-    }
+    resizeCanvas();
 
     function isFormValid() {
-      const name = document.getElementById("name").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const plz = document.getElementById("plz").value.trim();
-      const ort = document.getElementById("ort").value.trim();
-      const checkboxChecked = document.getElementById("confirmCheckbox").checked;
-      return name && address && plz && ort && checkboxChecked && !signaturePad.isEmpty();
+      return (
+        document.getElementById("name").value &&
+        document.getElementById("address").value &&
+        document.getElementById("plz").value &&
+        document.getElementById("ort").value &&
+        !signaturePad.isEmpty() &&
+        confirmCheckbox.checked
+      );
     }
 
-    function updateSaveButtonState() {
+    function updateButtonState() {
       if (isFormValid()) {
         saveButton.disabled = false;
         saveButton.classList.add("active");
@@ -180,13 +211,20 @@
       }
     }
 
-    document.querySelectorAll("input, #confirmCheckbox").forEach(el => {
-      el.addEventListener("input", updateSaveButtonState);
-      el.addEventListener("change", updateSaveButtonState);
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", updateButtonState);
     });
 
-    canvas.addEventListener("mouseup", updateSaveButtonState);
-    canvas.addEventListener("touchend", updateSaveButtonState);
+    canvas.addEventListener("mouseup", updateButtonState);
+    canvas.addEventListener("touchend", updateButtonState);
+
+    function clearSignature() {
+      signaturePad.clear();
+      clearButton.classList.add("cleared");
+      setTimeout(() => clearButton.classList.remove("cleared"), 600);
+      confirmCheckbox.checked = false;
+      updateButtonState();
+    }
 
     function generatePDF() {
       const name = document.getElementById("name").value;
@@ -202,17 +240,17 @@
           { text: "1. Verantwortliche Stelle", style: "subheader" },
           { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
           { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
-          { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet..." },
+          { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
           { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
-          { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung..." },
+          { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung und gesetzlich vorgeschriebenen Dokumentationen." },
           { text: "4. Weitergabe an Dritte", style: "subheader" },
-          { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist..." },
+          { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist oder aufgrund gesetzlicher Verpflichtungen." },
           { text: "5. Speicherdauer", style: "subheader" },
-          { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist..." },
+          { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen." },
           { text: "6. Ihre Rechte", style: "subheader" },
-          { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung..." },
+          { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
           { text: "7. Kontakt und Beschwerden", style: "subheader" },
-          { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse." },
+          { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
           { text: "\n________________________________________", margin: [0, 10, 0, 0] },
           { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
           { text: "________________________________________", margin: [0, 10, 0, 0] },
