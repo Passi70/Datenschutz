@@ -2,7 +2,7 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Datenschutzerklärung</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
@@ -11,98 +11,88 @@
         html, body {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
+            height: 100%;
             background-color: #f0f2f5;
-            height: 100vh;
             overflow: hidden;
+        }
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
         }
         .container {
             background: white;
-            padding: 20px;
+            padding: 10px;
             border-radius: 12px;
             box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-            width: 95vw;
-            max-width: 700px;
+            width: 90vw;
+            max-width: 600px;
             max-height: 95vh;
             overflow-y: auto;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
         }
-        h2 {
-            color: #333;
-            font-size: 1.4rem;
-            margin-bottom: 10px;
-            font-weight: bold;
+        h2, h3, label {
+            margin: 5px 0;
         }
         .header-info {
-            font-size: 0.9rem;
-            color: #333;
             text-align: right;
-            margin-bottom: 10px;
-        }
-        label {
-            font-size: 0.9rem;
-            font-weight: bold;
-            margin-bottom: 5px;
-            display: block;
+            font-size: 0.8rem;
         }
         input {
-            display: block;
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            padding: 6px;
             font-size: 0.9rem;
-            margin-bottom: 10px;
-        }
-        button {
-            background-color: #ccc;
-            color: white;
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            cursor: not-allowed;
-            font-size: 1rem;
-            transition: background 0.3s;
-            width: 100%;
-            margin-top: 8px;
-        }
-        button.active {
-            background-color: #28a745;
-            cursor: pointer;
-        }
-        #clearButton {
-            background-color: #dc3545;
-        }
-        #clearButton.success {
-            background-color: #28a745;
+            margin-bottom: 8px;
         }
         .checkbox-container {
             display: flex;
             align-items: flex-start;
             gap: 10px;
-            font-size: 0.9rem;
-            flex-wrap: wrap;
-            margin-top: 10px;
-        }
-        #signature-pad {
-            border: 2px solid black;
-            width: 100%;
-            height: 100px;
-            border-radius: 5px;
-            background-color: white;
             margin: 10px 0;
-            touch-action: none;
         }
-        @media (orientation: landscape) and (max-height: 600px) {
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            margin-top: 3px;
+        }
+        canvas {
+            width: 100%;
+            height: 80px;
+            border: 1.5px solid #000;
+            border-radius: 5px;
+            background: #fff;
+            margin-bottom: 10px;
+        }
+        button {
+            width: 100%;
+            padding: 8px;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+        #clearButton {
+            background-color: #d9534f;
+            color: white;
+        }
+        #clearButton.success {
+            background-color: #5cb85c;
+        }
+        #saveButton {
+            background-color: #ccc;
+            color: white;
+            cursor: not-allowed;
+        }
+        #saveButton.active {
+            background-color: #28a745;
+            cursor: pointer;
+        }
+
+        @media screen and (orientation: landscape) and (max-height: 600px) {
             .container {
-                height: 95vh;
-                width: 90vw;
-                max-width: 650px;
+                transform: scale(0.85);
+                transform-origin: top center;
             }
         }
     </style>
@@ -116,16 +106,16 @@
     </div>
 
     <label for="name">Name:</label>
-    <input type="text" id="name" required>
+    <input type="text" id="name">
 
     <label for="address">Adresse:</label>
-    <input type="text" id="address" required>
+    <input type="text" id="address">
 
     <label for="plz">PLZ:</label>
-    <input type="text" id="plz" required>
+    <input type="text" id="plz">
 
     <label for="ort">Ort:</label>
-    <input type="text" id="ort" required>
+    <input type="text" id="ort">
 
     <h3>Unterschrift:</h3>
     <canvas id="signature-pad"></canvas>
@@ -133,7 +123,7 @@
 
     <h3>Bestätigung:</h3>
     <div class="checkbox-container">
-        <input type="checkbox" id="confirmCheckbox" onchange="toggleSaveButton()">
+        <input type="checkbox" id="confirmCheckbox" onchange="updateSaveButtonState()">
         <label for="confirmCheckbox">Hiermit bestätige ich, dass ich die mir in der Praxis vorgelegte Datenschutzerklärung gelesen habe.</label>
     </div>
 
@@ -145,49 +135,46 @@
     const signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
 
     function resizeCanvas() {
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = 100 * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
+        canvas.width = canvas.offsetWidth;
+        canvas.height = 80;
         signaturePad.clear();
     }
     resizeCanvas();
     window.addEventListener("resize", resizeCanvas);
 
+    const saveButton = document.getElementById("saveButton");
+    const clearButton = document.getElementById("clearButton");
+
     function clearSignature() {
         signaturePad.clear();
+        clearButton.classList.add("success");
         document.getElementById("confirmCheckbox").checked = false;
-        document.getElementById("clearButton").classList.add("success");
-        setTimeout(() => document.getElementById("clearButton").classList.remove("success"), 500);
-        toggleSaveButton();
+        setTimeout(() => clearButton.classList.remove("success"), 300);
+        updateSaveButtonState();
     }
 
-    function isFormValid() {
-        return document.getElementById("name").value.trim() !== '' &&
-               document.getElementById("address").value.trim() !== '' &&
-               document.getElementById("plz").value.trim() !== '' &&
-               document.getElementById("ort").value.trim() !== '' &&
-               document.getElementById("confirmCheckbox").checked &&
-               !signaturePad.isEmpty();
-    }
+    function updateSaveButtonState() {
+        const name = document.getElementById("name").value.trim();
+        const address = document.getElementById("address").value.trim();
+        const plz = document.getElementById("plz").value.trim();
+        const ort = document.getElementById("ort").value.trim();
+        const checkbox = document.getElementById("confirmCheckbox").checked;
+        const signaturePresent = !signaturePad.isEmpty();
 
-    function toggleSaveButton() {
-        const button = document.getElementById("saveButton");
-        if (isFormValid()) {
-            button.disabled = false;
-            button.classList.add("active");
+        if (name && address && plz && ort && checkbox && signaturePresent) {
+            saveButton.disabled = false;
+            saveButton.classList.add("active");
         } else {
-            button.disabled = true;
-            button.classList.remove("active");
+            saveButton.disabled = true;
+            saveButton.classList.remove("active");
         }
     }
 
-    document.querySelectorAll("input, canvas").forEach(el => {
-        el.addEventListener("input", toggleSaveButton);
-        el.addEventListener("change", toggleSaveButton);
+    document.querySelectorAll("input").forEach(input => {
+        input.addEventListener("input", updateSaveButtonState);
     });
-    canvas.addEventListener("mouseup", toggleSaveButton);
-    canvas.addEventListener("touchend", toggleSaveButton);
+    canvas.addEventListener("mouseup", updateSaveButtonState);
+    canvas.addEventListener("touchend", updateSaveButtonState);
 
     function generatePDF() {
         const name = document.getElementById("name").value;
@@ -195,7 +182,8 @@
         const plz = document.getElementById("plz").value;
         const ort = document.getElementById("ort").value;
         const signatureDataUrl = signaturePad.toDataURL();
-        const formattedDate = new Date().toLocaleDateString('de-DE');
+        const today = new Date();
+        const formattedDate = today.toLocaleDateString("de-DE");
 
         const docDefinition = {
             content: [
@@ -226,7 +214,7 @@
             }
         };
 
-        pdfMake.createPdf(docDefinition).download(`Datenschutzerklärung_${name}.pdf`);
+        pdfMake.createPdf(docDefinition).download(`Datenschutzerklaerung_${name}.pdf`);
     }
 </script>
 </body>
