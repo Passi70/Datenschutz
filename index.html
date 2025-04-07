@@ -226,8 +226,24 @@ function generatePDF() {
         }
     };
 
-    pdfMake.createPdf(docDefinition).download(`Datenschutzerklaerung_${name}.pdf`);
-}
+pdfMake.createPdf(docDefinition).getBlob((blob) => {
+    const fileName = `Datenschutzerklaerung_${name}.pdf`;
+
+    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
+        // Für ältere IE-Versionen
+        window.navigator.msSaveOrOpenBlob(blob, fileName);
+    } else {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = fileName;
+        link.style.display = "none";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(link.href);
+    }
+});
+
 
 
 
