@@ -1,21 +1,21 @@
-self.addEventListener('install', e => {
+self.addEventListener('install', function (e) {
   e.waitUntil(
-    caches.open('pwa-cache').then(cache => {
+    caches.open('form-cache').then(function (cache) {
       return cache.addAll([
         './',
         './index.html',
         './manifest.json',
-        './service-worker.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.min.js',
-        'https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js',
-        'https://cdn.jsdelivr.net/npm/signature_pad'
+        './icon-192.png',
+        './icon-512.png'
       ]);
     })
   );
 });
 
-self.addEventListener('fetch', e => {
+self.addEventListener('fetch', function (e) {
   e.respondWith(
-    caches.match(e.request).then(response => response || fetch(e.request))
+    caches.match(e.request).then(function (response) {
+      return response || fetch(e.request);
+    })
   );
 });
