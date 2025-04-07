@@ -203,17 +203,17 @@ function generatePDF() {
             { text: "1. Verantwortliche Stelle", style: "subheader" },
             { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
             { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
-            { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet..." },
+            { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
             { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
-            { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung..." },
+            { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung und gesetzlich vorgeschriebenen Dokumentationen." },
             { text: "4. Weitergabe an Dritte", style: "subheader" },
-            { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist..." },
+            { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist oder aufgrund gesetzlicher Verpflichtungen." },
             { text: "5. Speicherdauer", style: "subheader" },
-            { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist..." },
+            { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen." },
             { text: "6. Ihre Rechte", style: "subheader" },
-            { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung..." },
+            { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
             { text: "7. Kontakt und Beschwerden", style: "subheader" },
-            { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse..." },
+            { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
             { text: "\n________________________________________", margin: [0, 10, 0, 0] },
             { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
             { text: "________________________________________", margin: [0, 10, 0, 0] },
@@ -226,13 +226,9 @@ function generatePDF() {
         }
     };
 
-pdfMake.createPdf(docDefinition).getBlob((blob) => {
-    const fileName = `Datenschutzerklaerung_${name}.pdf`;
+    pdfMake.createPdf(docDefinition).getBlob((blob) => {
+        const fileName = `Datenschutzerklaerung_${name}.pdf`;
 
-    if (window.navigator && window.navigator.msSaveOrOpenBlob) {
-        // Für ältere IE-Versionen
-        window.navigator.msSaveOrOpenBlob(blob, fileName);
-    } else {
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
         link.download = fileName;
@@ -241,8 +237,12 @@ pdfMake.createPdf(docDefinition).getBlob((blob) => {
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(link.href);
-    }
-});
+
+        // WICHTIG: SignaturePad aktiv halten
+        signaturePad.on();
+    });
+}
+
 
 
 
