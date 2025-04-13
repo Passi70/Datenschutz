@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Datenschutzerklärung</title>
 
-  <!-- PWA Meta -->
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#ffffff" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
+  <!-- PWA Support -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
-  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
@@ -73,6 +71,7 @@
       background: #fff;
       margin-bottom: 10px;
       touch-action: none;
+      -webkit-touch-callout: none;
     }
     button {
       width: 100%;
@@ -98,13 +97,6 @@
     #saveButton.active {
       background-color: #28a745;
       cursor: pointer;
-    }
-
-    @media screen and (orientation: landscape) and (max-height: 600px) {
-      .container {
-        transform: scale(0.85);
-        transform-origin: top center;
-      }
     }
   </style>
 </head>
@@ -146,9 +138,13 @@
     const signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
 
     function resizeCanvas() {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = 80;
-      signaturePad.clear();
+      requestAnimationFrame(() => {
+        const ratio = Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+        signaturePad.clear();
+      });
     }
 
     resizeCanvas();
@@ -188,79 +184,57 @@
     canvas.addEventListener("mouseup", updateSaveButtonState);
     canvas.addEventListener("touchend", updateSaveButtonState);
 
-
     function generatePDF() {
-        const name = document.getElementById("name").value;
-        const address = document.getElementById("address").value;
-        const plz = document.getElementById("plz").value;
-        const ort = document.getElementById("ort").value;
-        const signatureDataUrl = signaturePad.toDataURL();
-        const today = new Date();
-        const formattedDate = today.toLocaleDateString("de-DE");
+      const name = document.getElementById("name").value;
+      const address = document.getElementById("address").value;
+      const plz = document.getElementById("plz").value;
+      const ort = document.getElementById("ort").value;
+      const signatureDataUrl = signaturePad.toDataURL();
+      const today = new Date();
+      const formattedDate = today.toLocaleDateString("de-DE");
 
-        const docDefinition = {
-            content: [
-                { text: "Datenschutzerklärung", style: "header" },
-                { text: "1. Verantwortliche Stelle", style: "subheader" },
-                { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
-                { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
-                { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
-                { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
-                { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung und gesetzlich vorgeschriebenen Dokumentationen." },
-                { text: "4. Weitergabe an Dritte", style: "subheader" },
-                { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist oder aufgrund gesetzlicher Verpflichtungen." },
-                { text: "5. Speicherdauer", style: "subheader" },
-                { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen." },
-                { text: "6. Ihre Rechte", style: "subheader" },
-                { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
-                { text: "7. Kontakt und Beschwerden", style: "subheader" },
-                { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
-                { text: "\n________________________________________", margin: [0, 10, 0, 0] },
-                { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
-                { text: "________________________________________", margin: [0, 10, 0, 0] },
-                { text: "Unterschrift", italics: true },
-                { image: signatureDataUrl, width: 200, height: 100, margin: [0, 10, 0, 0] }
-            ],
-            styles: {
-                header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
-                subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] }
-            }
-        };
+      const docDefinition = {
+        content: [
+          { text: "Datenschutzerklärung", style: "header" },
+          { text: "1. Verantwortliche Stelle", style: "subheader" },
+          { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
+          { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
+          { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
+          { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
+          { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung und gesetzlich vorgeschriebenen Dokumentationen." },
+          { text: "4. Weitergabe an Dritte", style: "subheader" },
+          { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist oder aufgrund gesetzlicher Verpflichtungen." },
+          { text: "5. Speicherdauer", style: "subheader" },
+          { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen." },
+          { text: "6. Ihre Rechte", style: "subheader" },
+          { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
+          { text: "7. Kontakt und Beschwerden", style: "subheader" },
+          { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
+          { text: "\n________________________________________", margin: [0, 10, 0, 0] },
+          { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
+          { text: "________________________________________", margin: [0, 10, 0, 0] },
+          { text: "Unterschrift", italics: true },
+          { image: signatureDataUrl, width: 200, height: 100, margin: [0, 10, 0, 0] }
+        ],
+        styles: {
+          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+          subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] }
+        }
+      };
 
-        pdfMake.createPdf(docDefinition).getBlob((blob) => {
-            const fileName = `Datenschutzerklaerung_${name}.pdf`;
-            const blobUrl = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(blobUrl);
+      pdfMake.createPdf(docDefinition).getBlob((blob) => {
+        const fileName = `Datenschutzerklaerung_${name}.pdf`;
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
 
-            // Aktiviert das SignaturePad erneut
-            signaturePad.on();
-        });.pdf`;
-            const blobUrl = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = blobUrl;
-            link.download = fileName;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(blobUrl);
-        });
-    }
-
-
-
-
-
-
-    // Register service worker
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').then(() => {
-        console.log("Service Worker registriert");
+        // SignaturePad wieder aktivieren
+        signaturePad.on();
       });
     }
   </script>
