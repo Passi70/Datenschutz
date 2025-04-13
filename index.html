@@ -225,10 +225,21 @@ ________________________________________", margin: [0, 10, 0, 0] },
     }
   };
 
-  pdfMake.createPdf(docDefinition).open();
-  setTimeout(() => {
+  pdfMake.createPdf(docDefinition).getBlob((blob) => {
+    const fileName = `Datenschutzerklaerung_${name}.pdf`;
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = fileName;
+    link.style.display = "none";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+
     resizeCanvas();
     signaturePad.on();
+  });
   }, 500);
 }
 </script>
