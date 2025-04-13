@@ -138,17 +138,25 @@
   let signaturePad;
 
   function resizeCanvas() {
-    requestAnimationFrame(() => {
-      const ratio = Math.max(window.devicePixelRatio || 1, 1);
-      canvas.width = canvas.offsetWidth * ratio;
-      canvas.height = canvas.offsetHeight * ratio;
-      canvas.getContext("2d").scale(ratio, ratio);
-      signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+  const ratio = Math.max(window.devicePixelRatio || 1, 1);
+  canvas.width = canvas.offsetWidth * ratio;
+  canvas.height = 80 * ratio;
+  canvas.getContext("2d").scale(ratio, ratio);
+});
     });
   }
 
-  resizeCanvas();
-  window.addEventListener("resize", resizeCanvas);
+  window.addEventListener("load", () => {
+    setTimeout(() => {
+      resizeCanvas();
+      signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+    }, 300);
+  });
+
+  window.addEventListener("resize", () => {
+    resizeCanvas();
+    if (signaturePad) signaturePad.clear();
+  });
 
   const saveButton = document.getElementById("saveButton");
   const clearButton = document.getElementById("clearButton");
