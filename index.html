@@ -188,7 +188,7 @@
     canvas.addEventListener("mouseup", updateSaveButtonState);
     canvas.addEventListener("touchend", updateSaveButtonState);
 
-...
+
     function generatePDF() {
         const name = document.getElementById("name").value;
         const address = document.getElementById("address").value;
@@ -237,9 +237,20 @@
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(blobUrl);
+
+            // Aktiviert das SignaturePad erneut
+            signaturePad.on();
+        });.pdf`;
+            const blobUrl = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = blobUrl;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(blobUrl);
         });
     }
-...
 
 
 
