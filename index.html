@@ -222,9 +222,7 @@
         }
       };
 
-      pdfMake.createPdf(docDefinition).getBlob((blob) => {
-        const fileName = `Datenschutzerklaerung_${name}.pdf`;
-        const blobUrl = URL.createObjectURL(blob);
+      pdfMake.createPdf(docDefinition).open();
         const link = document.createElement("a");
         link.href = blobUrl;
         link.download = fileName;
