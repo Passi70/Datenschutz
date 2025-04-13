@@ -197,7 +197,9 @@
     content: [
       { text: "Datenschutzerklärung", style: "header" },
       { text: "1. Verantwortliche Stelle", style: "subheader" },
-      { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
+      { text: `Name: ${name}
+Adresse: ${address}
+PLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
       { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
       { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
       { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
@@ -210,7 +212,8 @@
       { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
       { text: "7. Kontakt und Beschwerden", style: "subheader" },
       { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
-      { text: "\n________________________________________", margin: [0, 10, 0, 0] },
+      { text: "
+________________________________________", margin: [0, 10, 0, 0] },
       { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
       { text: "________________________________________", margin: [0, 10, 0, 0] },
       { text: "Unterschrift", italics: true },
@@ -223,7 +226,10 @@
   };
 
   pdfMake.createPdf(docDefinition).open();
-  setTimeout(() => signaturePad.on(), 500);
+  setTimeout(() => {
+    resizeCanvas();
+    signaturePad.on();
+  }, 500);
 }
 </script>
 </body>
