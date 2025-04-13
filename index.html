@@ -228,16 +228,7 @@ ________________________________________", margin: [0, 10, 0, 0] },
       pdfMake.createPdf(docDefinition).open();
       setTimeout(() => signaturePad.on(), 500);
     }
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
 
-        // SignaturePad wieder aktivieren
-        signaturePad.on();
       });
     }
   </script>
