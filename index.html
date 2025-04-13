@@ -142,15 +142,9 @@
   canvas.width = canvas.offsetWidth * ratio;
   canvas.height = 80 * ratio;
   const context = canvas.getContext("2d");
-  context.scale(ratio, ratio);
+  context.setTransform(ratio, 0, resizeCanvas();
   signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
-}
-  }
-
-  window.addEventListener("load", () => {
-    setTimeout(() => {
-      resizeCanvas();
-      signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+});
     }, 300);
   });
 
