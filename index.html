@@ -141,9 +141,10 @@
   const ratio = Math.max(window.devicePixelRatio || 1, 1);
   canvas.width = canvas.offsetWidth * ratio;
   canvas.height = 80 * ratio;
-  canvas.getContext("2d").scale(ratio, ratio);
-});
-    });
+  const context = canvas.getContext("2d");
+  context.scale(ratio, ratio);
+  signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+}
   }
 
   window.addEventListener("load", () => {
