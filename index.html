@@ -134,115 +134,114 @@
   </div>
 
   <script>
-    const canvas = document.getElementById("signature-pad");
-    const signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+  const canvas = document.getElementById("signature-pad");
+  let signaturePad;
 
-    function resizeCanvas() {
-      requestAnimationFrame(() => {
-        const ratio = Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        const context = canvas.getContext("2d");
-        context.scale(ratio, ratio);
-        signaturePad.clear();
-        signaturePad._ctx = context;
-      });
-    }
-
-    resizeCanvas();
-    window.addEventListener("resize", resizeCanvas);
-
-    const saveButton = document.getElementById("saveButton");
-    const clearButton = document.getElementById("clearButton");
-
-    function clearSignature() {
-      signaturePad.clear();
-      clearButton.classList.add("success");
-      document.getElementById("confirmCheckbox").checked = false;
-      setTimeout(() => clearButton.classList.remove("success"), 300);
-      updateSaveButtonState();
-    }
-
-    function updateSaveButtonState() {
-      const name = document.getElementById("name").value.trim();
-      const address = document.getElementById("address").value.trim();
-      const plz = document.getElementById("plz").value.trim();
-      const ort = document.getElementById("ort").value.trim();
-      const checkbox = document.getElementById("confirmCheckbox").checked;
-      const signaturePresent = !signaturePad.isEmpty();
-
-      if (name && address && plz && ort && checkbox && signaturePresent) {
-        saveButton.disabled = false;
-        saveButton.classList.add("active");
-      } else {
-        saveButton.disabled = true;
-        saveButton.classList.remove("active");
-      }
-    }
-
-    document.querySelectorAll("input").forEach(input => {
-      input.addEventListener("input", updateSaveButtonState);
+  function resizeCanvas() {
+    requestAnimationFrame(() => {
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext("2d").scale(ratio, ratio);
+      signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
     });
-    canvas.addEventListener("mouseup", updateSaveButtonState);
-    canvas.addEventListener("touchend", updateSaveButtonState);
+  }
 
-    function generatePDF() {
-  const name = document.getElementById("name").value;
-  const address = document.getElementById("address").value;
-  const plz = document.getElementById("plz").value;
-  const ort = document.getElementById("ort").value;
-  const signatureDataUrl = signaturePad.toDataURL();
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString("de-DE");
+  resizeCanvas();
+  window.addEventListener("resize", resizeCanvas);
 
-  const docDefinition = {
-    content: [
-      { text: "Datenschutzerklärung", style: "header" },
-      { text: "1. Verantwortliche Stelle", style: "subheader" },
-      { text: `Name: ${name}
+  const saveButton = document.getElementById("saveButton");
+  const clearButton = document.getElementById("clearButton");
+
+  function clearSignature() {
+    if (signaturePad) {
+      signaturePad.clear();
+    }
+    clearButton.classList.add("success");
+    document.getElementById("confirmCheckbox").checked = false;
+    setTimeout(() => clearButton.classList.remove("success"), 300);
+    updateSaveButtonState();
+  }
+
+  function updateSaveButtonState() {
+    const name = document.getElementById("name").value.trim();
+    const address = document.getElementById("address").value.trim();
+    const plz = document.getElementById("plz").value.trim();
+    const ort = document.getElementById("ort").value.trim();
+    const checkbox = document.getElementById("confirmCheckbox").checked;
+    const signaturePresent = signaturePad && !signaturePad.isEmpty();
+
+    if (name && address && plz && ort && checkbox && signaturePresent) {
+      saveButton.disabled = false;
+      saveButton.classList.add("active");
+    } else {
+      saveButton.disabled = true;
+      saveButton.classList.remove("active");
+    }
+  }
+
+  document.querySelectorAll("input").forEach(input => {
+    input.addEventListener("input", updateSaveButtonState);
+  });
+  canvas.addEventListener("mouseup", updateSaveButtonState);
+  canvas.addEventListener("touchend", updateSaveButtonState);
+
+  function generatePDF() {
+    const name = document.getElementById("name").value;
+    const address = document.getElementById("address").value;
+    const plz = document.getElementById("plz").value;
+    const ort = document.getElementById("ort").value;
+    const signatureDataUrl = signaturePad.toDataURL();
+    const today = new Date();
+    const formattedDate = today.toLocaleDateString("de-DE");
+
+    const docDefinition = {
+      content: [
+        { text: "Datenschutzerklärung", style: "header" },
+        { text: "1. Verantwortliche Stelle", style: "subheader" },
+        { text: `Name: ${name}
 Adresse: ${address}
 PLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
-      { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
-      { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
-      { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
-      { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung und gesetzlich vorgeschriebenen Dokumentationen." },
-      { text: "4. Weitergabe an Dritte", style: "subheader" },
-      { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist oder aufgrund gesetzlicher Verpflichtungen." },
-      { text: "5. Speicherdauer", style: "subheader" },
-      { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen." },
-      { text: "6. Ihre Rechte", style: "subheader" },
-      { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
-      { text: "7. Kontakt und Beschwerden", style: "subheader" },
-      { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
-      { text: "
+        { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
+        { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
+        { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
+        { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung und gesetzlich vorgeschriebenen Dokumentationen." },
+        { text: "4. Weitergabe an Dritte", style: "subheader" },
+        { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist oder aufgrund gesetzlicher Verpflichtungen." },
+        { text: "5. Speicherdauer", style: "subheader" },
+        { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen." },
+        { text: "6. Ihre Rechte", style: "subheader" },
+        { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
+        { text: "7. Kontakt und Beschwerden", style: "subheader" },
+        { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
+        { text: "
 ________________________________________", margin: [0, 10, 0, 0] },
-      { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
-      { text: "________________________________________", margin: [0, 10, 0, 0] },
-      { text: "Unterschrift", italics: true },
-      { image: signatureDataUrl, width: 200, height: 100, margin: [0, 10, 0, 0] }
-    ],
-    styles: {
-      header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
-      subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] }
-    }
-  };
+        { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
+        { text: "________________________________________", margin: [0, 10, 0, 0] },
+        { text: "Unterschrift", italics: true },
+        { image: signatureDataUrl, width: 200, height: 100, margin: [0, 10, 0, 0] }
+      ],
+      styles: {
+        header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+        subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] }
+      }
+    };
 
-  pdfMake.createPdf(docDefinition).getBlob((blob) => {
-    const fileName = `Datenschutzerklaerung_${name}.pdf`;
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = blobUrl;
-    link.download = fileName;
-    link.style.display = "none";
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
+    pdfMake.createPdf(docDefinition).getBlob((blob) => {
+      const fileName = `Datenschutzerklaerung_${name}.pdf`;
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = fileName;
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(blobUrl);
 
-    resizeCanvas();
-    signaturePad.on();
-  });
-}
+      resizeCanvas();
+    });
+  }
 </script>
 </body>
 </html>
