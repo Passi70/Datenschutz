@@ -178,14 +178,7 @@
         document.body.removeChild(link);
         URL.revokeObjectURL(blobUrl);
 
-        // Formular zurücksetzen
-        document.getElementById("name").value = "";
-        document.getElementById("address").value = "";
-        document.getElementById("plz").value = "";
-        document.getElementById("ort").value = "";
-        document.getElementById("confirmCheckbox").checked = false;
-        signaturePad.clear();
-        updateSaveButtonState();
+        
       });.pdf`;
         const blobUrl = URL.createObjectURL(blob);
         const link = document.createElement("a");
