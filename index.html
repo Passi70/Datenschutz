@@ -142,8 +142,11 @@
 
 window.addEventListener("load", () => {
   resizeCanvas();
-  signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+  setTimeout(() => {
+    signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+  }, 250);
 });
+
 
 window.addEventListener("resize", resizeCanvas);
 
