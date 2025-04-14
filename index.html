@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <link rel="apple-touch-icon" href="icon-192.png">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Datenschutzerklärung</title>
@@ -14,6 +10,11 @@
   <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
   <style>
     html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background-color: #f0f2f5;
+      font-family: sans-serif;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -23,8 +24,8 @@
       padding: 20px;
       border-radius: 12px;
       box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-      width: 95vw;
-      max-width: 550px;
+      width: 90vw;
+      max-width: 600px;
       max-height: 95vh;
       overflow-y: auto;
       box-sizing: border-box;
@@ -73,8 +74,8 @@
     }
     button {
       width: 100%;
-      padding: 8px;
-      font-size: 0.95rem;
+      padding: 10px;
+      font-size: 1rem;
       border: none;
       border-radius: 8px;
       margin-top: 10px;
@@ -101,7 +102,7 @@
   </style>
 </head>
 <body>
-<div class="container">
+  <div class="container">
     <h2>Datenschutzerklärung</h2>
 
     <label for="name">Name:</label>
@@ -133,25 +134,19 @@
     let signaturePad;
 
     function resizeCanvas() {
-  const ratio = Math.max(window.devicePixelRatio || 1, 1);
-  canvas.width = canvas.offsetWidth * ratio;
-  canvas.height = 100 * ratio;
-  const context = canvas.getContext("2d");
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
-}
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = 100 * ratio;
+      const context = canvas.getContext("2d");
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
 
-window.addEventListener("load", () => {
-  resizeCanvas();
-  setTimeout(() => {
-    signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
-  }, 250);
-});
+    window.addEventListener("load", () => {
+      resizeCanvas();
+      signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
+    });
 
-
-window.addEventListener("resize", resizeCanvas);
-
-
-
+    window.addEventListener("resize", resizeCanvas);
 
     document.getElementById("clearButton").addEventListener("click", () => {
       signaturePad.clear();
@@ -190,9 +185,7 @@ window.addEventListener("resize", resizeCanvas);
         content: [
           { text: "Datenschutzerklärung", style: "header" },
           { text: "1. Verantwortliche Stelle", style: "subheader" },
-          { text: `Name: ${name}
-Adresse: ${address}
-PLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
+          { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
           { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
           { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
           { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
@@ -205,8 +198,7 @@ PLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
           { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
           { text: "7. Kontakt und Beschwerden", style: "subheader" },
           { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
-          { text: "
-________________________________________", margin: [0, 10, 0, 0] },
+          { text: "\n________________________________________", margin: [0, 10, 0, 0] },
           { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
           { text: "________________________________________", margin: [0, 10, 0, 0] },
           { text: "Unterschrift", italics: true },
