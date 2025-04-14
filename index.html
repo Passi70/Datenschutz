@@ -13,61 +13,79 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f4f4f4;
+    html, body {
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      height: 100%;
+      background-color: #f0f2f5;
+      overflow: hidden;
+    }
+    body {
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
     }
     .container {
       background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      padding: 10px;
+      border-radius: 12px;
+      box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+      width: 90vw;
       max-width: 600px;
-      width: 100%;
+      max-height: 95vh;
+      overflow-y: auto;
+      box-sizing: border-box;
     }
-    label {
-      display: block;
-      margin: 10px 0 5px;
+    h2, h3, label {
+      margin: 5px 0;
     }
     input {
       width: 100%;
-      padding: 8px;
-      box-sizing: border-box;
+      padding: 6px;
+      font-size: 0.9rem;
+      margin-bottom: 8px;
+    }
+    .checkbox-container {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 10px 0;
+    }
+    .checkbox-container input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      margin-top: 3px;
     }
     canvas {
-      border: 1px solid #000;
-      border-radius: 5px;
       width: 100%;
-      height: 150px;
-      margin-top: 10px;
+      height: 80px;
+      border: 1.5px solid #000;
+      border-radius: 5px;
+      background: #fff;
+      margin-bottom: 10px;
       touch-action: none;
+      -webkit-touch-callout: none;
     }
     button {
-      margin-top: 10px;
-      padding: 10px;
       width: 100%;
+      padding: 8px;
+      font-size: 1rem;
       border: none;
       border-radius: 5px;
-      font-size: 16px;
+      margin-top: 5px;
       cursor: pointer;
     }
-    #saveButton:disabled {
-      background: #ccc;
-      cursor: not-allowed;
+    #clearButton {
+      background-color: #d9534f;
+      color: white;
     }
     #saveButton {
-      background: #28a745;
+      background-color: #28a745;
       color: white;
     }
-    #clearButton {
-      background: #dc3545;
-      color: white;
+    #saveButton:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
     }
   </style>
 </head>
@@ -76,24 +94,31 @@
     <h2>Datenschutzerklärung</h2>
     <label for="name">Name:</label>
     <input type="text" id="name">
+
     <label for="address">Adresse:</label>
     <input type="text" id="address">
+
     <label for="plz">PLZ:</label>
     <input type="text" id="plz">
+
     <label for="ort">Ort:</label>
     <input type="text" id="ort">
 
-    <label>Unterschrift:</label>
+    <h3>Unterschrift:</h3>
     <canvas id="signature-pad"></canvas>
-    <button id="clearButton">Unterschrift löschen</button>
+    <button id="clearButton" onclick="clearSignature()">Unterschrift löschen</button>
 
-    <label><input type="checkbox" id="confirmCheckbox"> Ich habe die Datenschutzerklärung gelesen und akzeptiere sie.</label>
-    <button id="saveButton" disabled>PDF speichern</button>
+    <h3>Bestätigung:</h3>
+    <div class="checkbox-container">
+      <input type="checkbox" id="confirmCheckbox" onchange="updateSaveButtonState()">
+      <label for="confirmCheckbox">Ich habe die Datenschutzerklärung gelesen und akzeptiere sie.</label>
+    </div>
+
+    <button id="saveButton" onclick="generatePDF()" disabled>PDF speichern</button>
   </div>
 
   <script>
     const canvas = document.getElementById("signature-pad");
-    const ctx = canvas.getContext("2d");
     let signaturePad;
 
     function resizeCanvas() {
@@ -103,32 +128,37 @@
       canvas.getContext("2d").scale(ratio, ratio);
     }
 
-    window.addEventListener("resize", resizeCanvas);
     window.addEventListener("load", () => {
       resizeCanvas();
       signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
     });
 
-    document.getElementById("clearButton").addEventListener("click", () => {
+    window.addEventListener("resize", resizeCanvas);
+
+    function clearSignature() {
       signaturePad.clear();
+      document.getElementById("confirmCheckbox").checked = false;
       updateSaveButtonState();
-    });
-
-    document.querySelectorAll("input").forEach(input => {
-      input.addEventListener("input", updateSaveButtonState);
-    });
-    document.getElementById("confirmCheckbox").addEventListener("change", updateSaveButtonState);
-
-    function updateSaveButtonState() {
-      const allFilled = [...document.querySelectorAll("input[type='text']")].every(input => input.value.trim() !== "");
-      const checkboxChecked = document.getElementById("confirmCheckbox").checked;
-      const signed = !signaturePad.isEmpty();
-      const canSave = allFilled && checkboxChecked && signed;
-
-      document.getElementById("saveButton").disabled = !canSave;
     }
 
-    document.getElementById("saveButton").addEventListener("click", () => {
+    function updateSaveButtonState() {
+      const name = document.getElementById("name").value.trim();
+      const address = document.getElementById("address").value.trim();
+      const plz = document.getElementById("plz").value.trim();
+      const ort = document.getElementById("ort").value.trim();
+      const checkbox = document.getElementById("confirmCheckbox").checked;
+      const signaturePresent = !signaturePad.isEmpty();
+
+      document.getElementById("saveButton").disabled = !(name && address && plz && ort && checkbox && signaturePresent);
+    }
+
+    document.querySelectorAll("input[type='text']").forEach(input => {
+      input.addEventListener("input", updateSaveButtonState);
+    });
+    canvas.addEventListener("mouseup", updateSaveButtonState);
+    canvas.addEventListener("touchend", updateSaveButtonState);
+
+    function generatePDF() {
       const name = document.getElementById("name").value;
       const address = document.getElementById("address").value;
       const plz = document.getElementById("plz").value;
@@ -158,10 +188,10 @@
           { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
           { text: "________________________________________", margin: [0, 10, 0, 0] },
           { text: "Unterschrift", italics: true },
-          { image: signatureDataUrl, width: 300, margin: [0, 10, 0, 0] }
+          { image: signatureDataUrl, width: 200, height: 100, margin: [0, 10, 0, 0] }
         ],
         styles: {
-          header: { fontSize: 18, bold: true },
+          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
           subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] }
         }
       };
@@ -172,25 +202,12 @@
         const link = document.createElement("a");
         link.href = blobUrl;
         link.download = fileName;
-        link.style.display = "none";
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(blobUrl);
-
-        
-      });.pdf`;
-        const blobUrl = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = blobUrl;
-        link.download = fileName;
-        link.style.display = "none";
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(blobUrl);
       });
-    });
+    }
   </script>
 </body>
 </html>
