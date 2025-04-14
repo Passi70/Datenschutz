@@ -135,8 +135,7 @@
       const ratio = Math.max(window.devicePixelRatio || 1, 1);
       canvas.width = canvas.offsetWidth * ratio;
       canvas.height = canvas.offsetHeight * ratio;
-      const context = canvas.getContext("2d");
-  context.scale(ratio, ratio);
+      canvas.getContext("2d").scale(ratio, ratio);
     }
 
 window.addEventListener("load", () => {
