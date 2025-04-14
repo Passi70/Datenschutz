@@ -14,16 +14,6 @@
   <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      background: linear-gradient(to bottom right, #e0f7fa, #ffffff);
-      font-family: sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    body {
       display: flex;
       justify-content: center;
       align-items: center;
@@ -146,7 +136,7 @@
       canvas.width = canvas.offsetWidth * ratio;
       canvas.height = canvas.offsetHeight * ratio;
       const context = canvas.getContext("2d");
-  context.setTransform(ratio, 0, 0, ratio, 0, 0);
+  context.scale(ratio, ratio);
     }
 
 window.addEventListener("load", () => {
