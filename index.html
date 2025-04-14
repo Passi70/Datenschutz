@@ -33,8 +33,8 @@
       padding: 10px;
       border-radius: 12px;
       box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-      width: 90vw;
-      max-width: 600px;
+      width: 92vw;
+      max-width: 500px;
       max-height: 95vh;
       overflow-y: auto;
       box-sizing: border-box;
@@ -51,8 +51,8 @@
     }
     input {
       width: 100%;
-      padding: 8px;
-      font-size: 1rem;
+      padding: 6px;
+      font-size: 0.95rem;
       margin-top: 5px;
       margin-bottom: 12px;
       border: 1px solid #ccc;
@@ -72,7 +72,7 @@
     }
     canvas {
       width: 100%;
-      height: 100px;
+      height: 80px;
       border: 2px dashed #00796b;
       border-radius: 8px;
       background: #f9f9f9;
@@ -82,8 +82,8 @@
     }
     button {
       width: 100%;
-      padding: 10px;
-      font-size: 1rem;
+      padding: 8px;
+      font-size: 0.95rem;
       border: none;
       border-radius: 8px;
       margin-top: 10px;
@@ -192,7 +192,9 @@
         content: [
           { text: "Datenschutzerklärung", style: "header" },
           { text: "1. Verantwortliche Stelle", style: "subheader" },
-          { text: `Name: ${name}\nAdresse: ${address}\nPLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
+          { text: `Name: ${name}
+Adresse: ${address}
+PLZ, Ort: ${plz} ${ort}`, margin: [0, 10, 0, 10] },
           { text: "2. Erhebung und Verarbeitung personenbezogener Daten", style: "subheader" },
           { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
           { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
@@ -205,7 +207,8 @@
           { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
           { text: "7. Kontakt und Beschwerden", style: "subheader" },
           { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
-          { text: "\n________________________________________", margin: [0, 10, 0, 0] },
+          { text: "
+________________________________________", margin: [0, 10, 0, 0] },
           { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
           { text: "________________________________________", margin: [0, 10, 0, 0] },
           { text: "Unterschrift", italics: true },
