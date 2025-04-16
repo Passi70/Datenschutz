@@ -224,6 +224,15 @@
         link.click();
         document.body.removeChild(link);
         URL.revokeObjectURL(blobUrl);
+
+        // Eingabefelder und Status zurücksetzen
+        document.getElementById("name").value = "";
+        document.getElementById("address").value = "";
+        document.getElementById("plz").value = "";
+        document.getElementById("ort").value = "";
+        document.getElementById("confirmCheckbox").checked = false;
+        signaturePad.clear();
+        updateSaveButtonState();
       });
     });
   </script>
