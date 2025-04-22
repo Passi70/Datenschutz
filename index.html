@@ -1,22 +1,17 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Datenschutzerklärung</title>
-
-  <!-- PWA -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Datenschutzerklärung</title>
 
-  <!-- Libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/pdfmake.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.8/vfs_fonts.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/signature_pad"></script>
-
-  <!-- Styles -->
   <style>
     html, body {
       margin: 0;
@@ -39,24 +34,11 @@
       overflow-y: auto;
       box-sizing: border-box;
     }
-    /* Header with address */
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
+    h2 {
+      text-align: center;
+      color: #00796b;
       margin-bottom: 10px;
     }
-    .header h2 {
-      margin: 0;
-      color: #00796b;
-      font-size: 1.4rem;
-    }
-    .address-block {
-      text-align: right;
-      font-size: 0.8rem;
-      line-height: 1.2;
-    }
-
     label {
       font-weight: bold;
       margin-top: 6px;
@@ -92,6 +74,7 @@
       margin: 10px 0;
       touch-action: none;
       -webkit-touch-callout: none;
+      pointer-events: auto;
     }
     button {
       width: 100%;
@@ -102,23 +85,29 @@
       margin-top: 10px;
       transition: background-color 0.3s ease;
     }
-    #clearButton { background-color: #e53935; color: white; }
-    #clearButton:hover { background-color: #d32f2f; }
-    #saveButton { background-color: #43a047; color: white; }
-    #saveButton:hover:enabled { background-color: #388e3c; }
-    #saveButton:disabled { background-color: #bdbdbd; cursor: not-allowed; }
+    #clearButton {
+      background-color: #e53935;
+      color: white;
+    }
+    #clearButton:hover {
+      background-color: #d32f2f;
+    }
+    #saveButton {
+      background-color: #43a047;
+      color: white;
+    }
+    #saveButton:hover:enabled {
+      background-color: #388e3c;
+    }
+    #saveButton:disabled {
+      background-color: #bdbdbd;
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <h2>Datenschutzerklärung</h2>
-      <div class="address-block">
-        <strong>Ute Fortan Physiotherapie</strong><br>
-        19294 Eldena<br>
-        Marktplatz 5
-      </div>
-    </div>
+    <h2>Datenschutzerklärung</h2>
 
     <label for="name">Name:</label>
     <input type="text" id="name">
@@ -160,16 +149,22 @@
       resizeCanvas();
       signaturePad = new SignaturePad(canvas, { minWidth: 1, maxWidth: 1.5 });
     });
+
     window.addEventListener("resize", resizeCanvas);
 
-    // Clear signature
     document.getElementById("clearButton").addEventListener("click", () => {
       signaturePad.clear();
       document.getElementById("confirmCheckbox").checked = false;
       updateSaveButtonState();
     });
 
-    // Update save button
+    document.querySelectorAll("input").forEach(input => {
+      input.addEventListener("input", updateSaveButtonState);
+    });
+    document.getElementById("confirmCheckbox").addEventListener("change", updateSaveButtonState);
+    canvas.addEventListener("mouseup", updateSaveButtonState);
+    canvas.addEventListener("touchend", updateSaveButtonState);
+
     function updateSaveButtonState() {
       const name = document.getElementById("name").value.trim();
       const address = document.getElementById("address").value.trim();
@@ -177,15 +172,10 @@
       const ort = document.getElementById("ort").value.trim();
       const checkbox = document.getElementById("confirmCheckbox").checked;
       const signaturePresent = signaturePad && !signaturePad.isEmpty();
+
       document.getElementById("saveButton").disabled = !(name && address && plz && ort && checkbox && signaturePresent);
     }
 
-    document.querySelectorAll("input").forEach(inp => inp.addEventListener("input", updateSaveButtonState));
-    document.getElementById("confirmCheckbox").addEventListener("change", updateSaveButtonState);
-    canvas.addEventListener("mouseup", updateSaveButtonState);
-    canvas.addEventListener("touchend", updateSaveButtonState);
-
-    // Save PDF
     document.getElementById("saveButton").addEventListener("click", () => {
       const name = document.getElementById("name").value;
       const address = document.getElementById("address").value;
@@ -204,4 +194,47 @@
           { text: "Ihre personenbezogenen Daten werden nur im Rahmen der gesetzlichen Bestimmungen verarbeitet. Dies betrifft insbesondere Name, Adresse, Telefonnummer und E-Mail-Adresse, soweit diese zur Vertragserfüllung oder Kontaktaufnahme erforderlich sind." },
           { text: "3. Zweck der Datenverarbeitung", style: "subheader" },
           { text: "Die erhobenen Daten dienen ausschließlich der Vertragserfüllung, Kundenbetreuung und gesetzlich vorgeschriebenen Dokumentationen." },
-          { text: "4. Weitergabe
+          { text: "4. Weitergabe an Dritte", style: "subheader" },
+          { text: "Eine Weitergabe Ihrer Daten erfolgt nur, wenn dies zur Vertragserfüllung notwendig ist oder aufgrund gesetzlicher Verpflichtungen." },
+          { text: "5. Speicherdauer", style: "subheader" },
+          { text: "Ihre Daten werden nur so lange gespeichert, wie es für die genannten Zwecke erforderlich ist oder gesetzliche Aufbewahrungsfristen bestehen." },
+          { text: "6. Ihre Rechte", style: "subheader" },
+          { text: "Sie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung sowie Widerspruch gegen die Verarbeitung Ihrer personenbezogenen Daten. Anfragen richten Sie bitte an die oben genannte verantwortliche Stelle." },
+          { text: "7. Kontakt und Beschwerden", style: "subheader" },
+          { text: "Bei Fragen zum Datenschutz oder Beschwerden wenden Sie sich bitte an die oben genannte Adresse oder an die zuständige Datenschutzbehörde." },
+          { text: "\n________________________________________", margin: [0, 10, 0, 0] },
+          { text: `Ort, Datum: Eldena, ${formattedDate}`, margin: [0, 5, 0, 0] },
+          { text: "________________________________________", margin: [0, 10, 0, 0] },
+          { text: "Unterschrift", italics: true },
+          { image: signatureDataUrl, width: 200, height: 100, margin: [0, 10, 0, 0] }
+        ],
+        styles: {
+          header: { fontSize: 18, bold: true, margin: [0, 0, 0, 10] },
+          subheader: { fontSize: 14, bold: true, margin: [0, 10, 0, 5] }
+        }
+      };
+
+      pdfMake.createPdf(docDefinition).getBlob((blob) => {
+        const fileName = `Datenschutzerklaerung_${name}.pdf`;
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+
+        // Eingabefelder und Status zurücksetzen
+        document.getElementById("name").value = "";
+        document.getElementById("address").value = "";
+        document.getElementById("plz").value = "";
+        document.getElementById("ort").value = "";
+        document.getElementById("confirmCheckbox").checked = false;
+        signaturePad.clear();
+        updateSaveButtonState();
+      });
+    });
+  </script>
+</body>
+</html>
